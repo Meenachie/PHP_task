@@ -24,7 +24,7 @@ if(!isset($_SESSION["user"])){
 </head>
 <body>
   <div class="container-fluid mt-3">
-    <button class="btn btn-outline-light text-dark btn-md" style="float:right;"><a href="index.html" style="text-decoration: none; color:black;">LOG OUT</a></button>
+    <button class="btn btn-outline-light text-dark btn-md" style="float:right;"><a href="index.php" style="text-decoration: none; color:black;">LOG OUT</a></button>
     <p></p><br><br><br>
     <p class="h1 text-center" style="font-size:50px; font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; color: white;" ><b>Hello!</b></p>
     <img src="welcome.gif" class=" img-fluid mx-auto d-block " style="height: 300px;" alt="welcome img">
