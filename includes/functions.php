@@ -113,6 +113,9 @@ function change_password(){
         else if($email != $_SESSION["email"]){
           echo "<div class='alert alert-danger'>Email is not valid</div>";
         }
+        else if($old_password != $_SESSION["password"]){
+          echo "<div class='alert alert-danger'>Old Password is wrong</div>";
+        }
         else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $old_password)){
           echo "<div class='alert alert-danger'>Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters</div>";
         }
