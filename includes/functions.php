@@ -7,20 +7,15 @@
         $Password=$_POST["password"];
         if(empty($Email) || empty($Password)){
             echo "<div class='alert alert-danger'>All fields are required</div>";
-        }else if(!filter_var($Email, FILTER_VALIDATE_EMAIL)){
-            echo "<div class='alert alert-danger'>Email is not valid</div>";
-        }else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $Password)){
+        }
+        else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $Password)){ //regular expression
             echo "<div class='alert alert-danger'>Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters</div>";
         }else{
             require_once "connect.php";
-            $sql = "SELECT * FROM `signup` WHERE Email='$Email'";
+            $sql = "SELECT Password FROM `signup` WHERE Email='$Email'";
             $result = mysqli_query($conn, $sql);
-            $user = mysqli_num_rows($result);
-            if($user==1) {
-              $sql= "SELECT Password FROM `signup` WHERE Email='$Email'"; //get the password from DB and store it in a variable.
-              $result=mysqli_query($conn,$sql);
-              $row = $result->fetch_assoc();
-              $hash = $row["Password"];
+            $user = $result->fetch_assoc();
+            $hash = $user["Password"];
               if(password_verify($Password, $hash)) { 
                 session_start();
                 $_SESSION["email"]="$Email";
@@ -29,11 +24,9 @@
                 header("Location: welcome.php");
               }else {
                echo "<div class='alert alert-danger'>Password is incorrect!</div>"; 
-              }       
-            }else {
-            echo "<div class='alert alert-danger'>Email is incorrect!</div>"; 
+              }   
+
             }
-        }
     }
  }
 
@@ -45,22 +38,17 @@ function signup(){
       $Password=$_POST["password"];
       $Confirm_password=$_POST["confirm_password"];
       $hashed_password = password_hash($Password, PASSWORD_DEFAULT);
-      $error = array();
+
       if(empty($Name) || empty($Email) || empty($Password) || empty($Confirm_password)){
-        array_push($error,"All fields are required");
+        echo "<div class='alert alert-danger'>All fields are required</div>";
       }else if(!preg_match ("/^[a-zA-z]*$/", $Name)){ 
-        array_push($error," Name should only contain alphabets");
+        echo "<div class='alert alert-danger'>Name should only contain alphabets</div>";
       }else if(!filter_var($Email, FILTER_VALIDATE_EMAIL)){
-        array_push($error,"Email is not valid");
+        echo "<div class='alert alert-danger'>Email is not valid</div>";
       }else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $Password)){
-        array_push($error,"Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters");
+        echo "<div class='alert alert-danger'>Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters</div>";
       }else if($Password!==$Confirm_password){
-        array_push($error,"Password does not match");
-      }
-      if(count($error)>0){
-        foreach($error as $errors){
-        echo"<div class='alert alert-danger'>$errors</div>";
-      }
+        echo "<div class='alert alert-danger'>Password does not match</div>";
       }else{
         require_once "connect.php";
         $sql = "SELECT * FROM `signup` WHERE Email='$Email'";
@@ -99,30 +87,26 @@ function dashboard(){
 
 //funtion to change password
 function change_password(){
-    if(isset($_POST["submit"])) {
-        $email=$_POST["email"];
-        $old_password=$_POST["old_password"];
-        $new_password=$_POST["new_password"];
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        if(empty($email) || empty($old_password) || empty($new_password)){
-          echo "<div class='alert alert-danger'>All fields are required</div>";
-        }
-        else if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-          echo "<div class='alert alert-danger'>Email is not valid</div>";
-        }
-        else if($email != $_SESSION["email"]){
-          echo "<div class='alert alert-danger'>Email is not valid</div>";
-        }
-        else if($old_password != $_SESSION["password"]){
+  if(isset($_POST["submit"])) {
+    $email=$_POST["email"];
+    $old_password=$_POST["old_password"];
+    $new_password=$_POST["new_password"];
+    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+    if(empty($email) || empty($old_password) || empty($new_password)){
+      echo "<div class='alert alert-danger'>All fields are required</div>";
+    }else if($email != $_SESSION["email"]){
+      echo "<div class='alert alert-danger'>Email is not valid</div>";
+    }else{
+        require_once "connect.php";
+        $sql= "SELECT Password FROM `signup` WHERE Email ='$email'";  //get current password from the db, password verify
+        $result = mysqli_query($conn, $sql);
+        $row = $result->fetch_assoc();
+        $Password= $row["Password"];
+        if(!password_verify($old_password,$Password)){
           echo "<div class='alert alert-danger'>Old Password is wrong</div>";
-        }
-        else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $old_password)){
-          echo "<div class='alert alert-danger'>Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters</div>";
-        }
-        else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $new_password)){
+        }else if(!preg_match ("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/", $new_password)){
             echo "<div class='alert alert-danger'>Password must contain at least one number, one uppercase and lowercase letter, and at least 8 characters</div>";
-        }
-        else{
+        }else{
           require_once "connect.php";
           $sql = "UPDATE signup SET Password='$hashed_password' WHERE Email='$email'";
           $result = mysqli_query($conn, $sql);
@@ -130,10 +114,11 @@ function change_password(){
             echo "<div class='alert alert-success'>Congratulations! You have successfully changed your password</div>";
           }
           else{
-            echo "Old Password is wrong";
+            echo "Something went wrong!";
           }
         }
     }
+  }
 }
 
 //function to logout session
